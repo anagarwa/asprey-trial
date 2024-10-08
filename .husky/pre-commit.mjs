@@ -9,7 +9,6 @@ const run = (cmd) => new Promise((resolve, reject) => exec(
 ));
 
 try {
-    console.log("I am here");
     // Get the current branch name
     const branch = await run('git rev-parse --abbrev-ref HEAD');
 

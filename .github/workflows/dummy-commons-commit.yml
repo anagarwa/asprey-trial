@@ -4,6 +4,9 @@ name: Push Dummy Commit to Commons Repo
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write  # Grant write permission to push changes
+
 jobs:
   push_commons_changes:
     runs-on: ubuntu-latest
@@ -13,15 +16,16 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v2
         with:
-          ref: "dev"
+          ref: "dev"  # Checkout the 'dev' branch of your main repo
           fetch-depth: 0  # Fetch full history to make git subtree work
 
+      # Step 2: Set up Git identity (before commit)
       - name: Set up Git identity
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      # Step 2: Create a dummy commit in the commons folder
+      # Step 3: Create a dummy commit in the commons folder
       - name: Create Dummy Commit in Commons Folder
         run: |
           # Create a test file in the commons folder
@@ -31,9 +35,12 @@ jobs:
 
       # Step 4: Push the changes in the commons folder to the commons repository using subtree
       - name: Push to Commons Repo using Subtree
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          COMMONS_REPO_URL="https://github.com/anagarwa/first-helix-website.git"
+          COMMONS_REPO_URL="https://${{ secrets.GITHUB_TOKEN }}@github.com/anagarwa/first-helix-website.git"
           BRANCH_NAME="commons-push-$(date +'%Y%m%d%H%M')"
-          
+
           # Push only the contents of the 'commons' folder to the commons repo
-          git subtree push --prefix=commons $COMMONS_REPO_URL $BRANCH_NAME
+          git remote add commons $COMMONS_REPO_URL
+          git subtree push --prefix=commons commons $BRANCH_NAME

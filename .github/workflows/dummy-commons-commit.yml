@@ -29,12 +29,6 @@ jobs:
           git add commons/dummy-file.txt
           git commit -m "chore: Add dummy commit to commons folder"
 
-      # Step 3: Set up Git identity (optional if using GITHUB_TOKEN)
-      - name: Set up Git identity
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
       # Step 4: Push the changes in the commons folder to the commons repository using subtree
       - name: Push to Commons Repo using Subtree
         run: |

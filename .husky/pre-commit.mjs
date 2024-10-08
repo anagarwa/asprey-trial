@@ -9,9 +9,6 @@ const run = (cmd) => new Promise((resolve, reject) => exec(
 ));
 
 try {
-    // Get the current branch name
-    const branch = await run('git rev-parse --abbrev-ref HEAD');
-
     // Get the list of staged changes
     const changeset = await run('git diff --cached --name-only --diff-filter=ACMR');
     const modifiedFiles = changeset.split('\n').filter(Boolean);
@@ -22,7 +19,7 @@ try {
 
     // changes include both commons and other files
     if (commonsChanges.length > 0 && otherChanges.length > 0) {
-        console.error("Error: Changes in both 'commons/' and other folders are not allowed in the same commit on the main branch.");
+        console.error("Error: Changes in both 'commons/' and other folders are not allowed in the same commit");
         process.exit(1);  // Exit with error
     }
 

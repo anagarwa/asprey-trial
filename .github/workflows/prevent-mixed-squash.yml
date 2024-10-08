@@ -10,16 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Ensure that the full commit history is fetched
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Fetch all commit history so we can compare across commits
 
       - name: Check for mixed changes in commits
         run: |
           # Get all the commits in the PR
           commits=$(git log --pretty=format:"%H" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
-          
-          # Initialize flags for detecting mixed changes
-          commons_changes_in_commit=false
-          non_commons_changes_in_commit=false
           
           # Loop through each commit to check for mixed changes
           for commit in $commits; do

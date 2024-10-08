@@ -24,6 +24,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --unset-all http.github.com/.extraheader
 
       # Step 3: Create a dummy commit in the commons folder
       - name: Create Dummy Commit in Commons Folder

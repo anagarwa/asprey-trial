@@ -2,7 +2,7 @@ name: Push commons changes and Create PR in Commons Repo
 
 permissions:
   contents: write  # Allows push permissions for the GITHUB_TOKEN
-  
+
 on:
   pull_request:
     types: [closed]

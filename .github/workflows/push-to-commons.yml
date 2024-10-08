@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - main  # Trigger only when PRs are merged into the 'main' branch
+      - dev  # Trigger only when PRs are merged into the 'main' branch
 
 jobs:
   push_commons_changes:

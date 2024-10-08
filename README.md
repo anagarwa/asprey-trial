@@ -1,7 +1,7 @@
 # Franklin Screens Project Boilerplate
 This project is based on [helix-project-boilerplate](https://github.com/adobe/helix-project-boilerplate). 
 The tutorial guide to use this boilerplate code is present [here](https://main--screens-franklin-documentation--hlxscreens.hlx.live/developer/tutorial).
-Change 3
+Change 1
 ## Environments
 - Preview: https://main--{repo}--{owner}.hlx.page/
 - Live: https://main--{repo}--{owner}.hlx.live/

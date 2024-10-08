@@ -24,7 +24,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config --unset-all http.github.com/.extraheader
 
       # Step 3: Create a dummy commit in the commons folder
       - name: Create Dummy Commit in Commons Folder
@@ -39,6 +38,7 @@ jobs:
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
+          git config --unset-all http.github.com/.extraheader
           COMMONS_REPO_URL="https://${{ secrets.PAT_TOKEN }}@github.com/anagarwa/first-helix-website.git"
           BRANCH_NAME="commons-push-$(date +'%Y%m%d%H%M')"
 

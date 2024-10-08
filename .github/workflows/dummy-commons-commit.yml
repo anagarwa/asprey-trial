@@ -33,13 +33,18 @@ jobs:
           git add commons/dummy-file.txt
           git commit -m "chore: Add dummy commit to commons folder"
 
-      # Step 4: Push the changes in the commons folder to the commons repository using subtree
-      - name: Push to Commons Repo using Subtree
+      # Step 4: Use SSH to push the changes in the commons folder to the commons repository using subtree
+      - name: Push to Commons Repo using Subtree with SSH
         env:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          git config --unset-all http.github.com/.extraheader
-          COMMONS_REPO_URL="https://${{ secrets.PAT_TOKEN }}@github.com/anagarwa/first-helix-website.git"
+          # Setup SSH
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+
+          COMMONS_REPO_URL="git@github.com:anagarwa/first-helix-website.git"
           BRANCH_NAME="commons-push-$(date +'%Y%m%d%H%M')"
 
           # Push only the contents of the 'commons' folder to the commons repo

@@ -21,8 +21,8 @@ try {
     const commonsChanges = modifiedFiles.filter(file => file.startsWith('commons/'));
     const otherChanges = modifiedFiles.filter(file => !file.startsWith('commons/'));
 
-    // Check if we are on the main branch and changes include both commons and other files
-    if (branch.trim() === 'main' && commonsChanges.length > 0 && otherChanges.length > 0) {
+    // changes include both commons and other files
+    if (commonsChanges.length > 0 && otherChanges.length > 0) {
         console.error("Error: Changes in both 'commons/' and other folders are not allowed in the same commit on the main branch.");
         process.exit(1);  // Exit with error
     }

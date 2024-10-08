@@ -1,60 +1,36 @@
-name: Push commons changes and Create PR in Commons Repo
-
-permissions:
-  contents: write  # Allows push permissions for the GITHUB_TOKEN
+name: Push to Commons Repo
 
 on:
-  pull_request:
-    types: [closed]
-    branches:
-      - dev  # Trigger only when PRs are merged into the 'main' branch
+  workflow_dispatch:
 
 jobs:
-  push_commons_changes:
-    if: github.event.pull_request.merged == true
+  push_changes:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout the arena repository
-        uses: actions/checkout@v2
+      - name: Checkout source repository
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Fetch full history for subtree
+          ref: dev
 
-      - name: Check for changes in the commons folder
-        run: |
-          # Check if there are changes in the commons folder
-          commons_changes=$(git diff --name-only HEAD^ HEAD | grep '^commons/' || true)
-
-          if [ -z "$commons_changes" ]; then
-            echo "No changes in the commons folder. Skipping push and PR to commons repo."
-            exit 0
-          else
-            echo "Changes found in commons folder. Proceeding to push to commons repo."
-          fi
-
-      - name: Set up Git identity to match PR author
-        run: |
-          PR_AUTHOR_NAME=$(jq -r '.pull_request.user.login' "$GITHUB_EVENT_PATH")
-          PR_AUTHOR_EMAIL="$PR_AUTHOR_NAME@users.noreply.github.com"
-
-          # Set Git identity to match the PR author
-          git config user.name "$PR_AUTHOR_NAME"
-          git config user.email "$PR_AUTHOR_EMAIL"
-
-      - name: Push changes to the commons repository subtree
-        run: |
-          COMMONS_REPO_URL="https://github.com/anagarwa/first-helix-website.git"
-          FEATURE_BRANCH="${{ github.event.pull_request.head.ref }}"  # Use the PR branch name
-
-          # Push the changes in the commons folder to the commons repository
-          git subtree push --prefix=commons $COMMONS_REPO_URL $FEATURE_BRANCH
-
-      - name: Create Pull Request in Commons Repo
-        uses: peter-evans/create-pull-request@v5
+      - name: Set up SSH key
+        uses: actions/setup-ssh@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: "anagarwa/first-helix-website"
-          branch: $FEATURE_BRANCH
-          title: "Sync changes from arena repo"
-          body: "This PR syncs changes made in the 'commons' folder in the arena repository."
-          base: "main"
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-private-key-file: ~/.ssh/id_rsa
+
+      - name: Add remote repository
+        run: git remote add upstream git@github.com:anagarwa/first-helix-website.git
+
+      - name: Fetch changes from upstream
+        run: git fetch upstream
+
+      - name: Create dummy commit in commons folder
+        run: |
+          cd commons
+          touch dummy_file.txt
+          git add dummy_file.txt
+          git commit -m "Dummy commit"
+          cd ..
+
+      - name: Push subtree changes to upstream
+        run: git subtree push --prefix commons upstream dev

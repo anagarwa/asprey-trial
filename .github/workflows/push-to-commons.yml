@@ -7,7 +7,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - dev  # Trigger only when PRs are merged into the 'main' branch
+      - dev  # Trigger only when PRs are merged into the 'dev' branch
 
 jobs:
   push_commons_changes:
@@ -15,14 +15,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the arena repository
       - name: Checkout the arena repository
         uses: actions/checkout@v2
         with:
+          ref: "dev"
           fetch-depth: 0  # Fetch full history for subtree
 
+      # Step 2: Check for changes in the commons folder
       - name: Check for changes in the commons folder
         run: |
-          # Check if there are changes in the commons folder
           commons_changes=$(git diff --name-only HEAD^ HEAD | grep '^commons/' || true)
 
           if [ -z "$commons_changes" ]; then
@@ -32,28 +34,39 @@ jobs:
             echo "Changes found in commons folder. Proceeding to push to commons repo."
           fi
 
+      # Step 3: Set up Git identity to match PR author
       - name: Set up Git identity to match PR author
         run: |
           PR_AUTHOR_NAME=$(jq -r '.pull_request.user.login' "$GITHUB_EVENT_PATH")
           PR_AUTHOR_EMAIL="$PR_AUTHOR_NAME@users.noreply.github.com"
-
-          # Set Git identity to match the PR author
           git config user.name "$PR_AUTHOR_NAME"
           git config user.email "$PR_AUTHOR_EMAIL"
 
+      # Step 4: Set up SSH key for Git
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      # Step 5: Push changes to the commons repository using subtree via SSH
       - name: Push changes to the commons repository subtree
         run: |
-          COMMONS_REPO_URL="https://github.com/anagarwa/first-helix-website.git"
+          COMMONS_REPO_URL="git@github.com:anagarwa/first-helix-website.git"
           FEATURE_BRANCH="${{ github.event.pull_request.head.ref }}"  # Use the PR branch name
 
-          # Push the changes in the commons folder to the commons repository
-          git subtree push --prefix=commons $COMMONS_REPO_URL $FEATURE_BRANCH
+          # Push the changes in the commons folder to the commons repository using SSH
+          git remote add commons $COMMONS_REPO_URL
+          git subtree push --prefix=commons commons $FEATURE_BRANCH
 
+      # Step 6: Create Pull Request in Commons Repo
       - name: Create Pull Request in Commons Repo
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: "anagarwa/first-helix-website"
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}  # Use the SSH key
           branch: $FEATURE_BRANCH
           title: "Sync changes from arena repo"
           body: "This PR syncs changes made in the 'commons' folder in the arena repository."

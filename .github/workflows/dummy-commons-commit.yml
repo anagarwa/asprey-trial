@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write  # Grant write permission to push changes
+  contents: write  # Still keep this to ensure write permissions
 
 jobs:
   push_commons_changes:
@@ -36,9 +36,9 @@ jobs:
       # Step 4: Push the changes in the commons folder to the commons repository using subtree
       - name: Push to Commons Repo using Subtree
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          COMMONS_REPO_URL="https://${{ secrets.GITHUB_TOKEN }}@github.com/anagarwa/first-helix-website.git"
+          COMMONS_REPO_URL="https://${{ secrets.PAT_TOKEN }}@github.com/anagarwa/first-helix-website.git"
           BRANCH_NAME="commons-push-$(date +'%Y%m%d%H%M')"
 
           # Push only the contents of the 'commons' folder to the commons repo

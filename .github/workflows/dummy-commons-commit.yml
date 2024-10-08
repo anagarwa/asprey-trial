@@ -16,6 +16,11 @@ jobs:
           ref: "dev"
           fetch-depth: 0  # Fetch full history to make git subtree work
 
+      - name: Set up Git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
       # Step 2: Create a dummy commit in the commons folder
       - name: Create Dummy Commit in Commons Folder
         run: |

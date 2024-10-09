@@ -55,19 +55,8 @@ jobs:
         run: |
           COMMONS_REPO_URL="git@github.com:anagarwa/first-helix-website.git"
           FEATURE_BRANCH="${{ github.event.pull_request.head.ref }}"  # Use the PR branch name
+          TARGET_BRANCH="automated-arena-push-${FEATURE_BRANCH}"
 
           # Push the changes in the commons folder to the commons repository using SSH
           git remote add commons $COMMONS_REPO_URL
-          git subtree push --prefix=commons commons $FEATURE_BRANCH
-
-      # Step 6: Create Pull Request in Commons Repo
-      - name: Create Pull Request in Commons Repo
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: "anagarwa/first-helix-website"
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}  # Use the SSH key
-          branch: $FEATURE_BRANCH
-          title: "Sync changes from arena repo"
-          body: "This PR syncs changes made in the 'commons' folder in the arena repository."
-          base: "main"
+          git subtree push --prefix=commons commons $TARGET_BRANCH

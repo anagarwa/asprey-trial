@@ -27,3 +27,9 @@ jobs:
       - name: Git logging
         run: |
           git log
+
+      - name: Create a Pull Request
+        run: |
+          gh pr create --base main --head automated-arena-push-branch-test-2 --title "Your PR Title" --body "Description of the PR"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

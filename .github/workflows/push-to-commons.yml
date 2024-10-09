@@ -60,3 +60,5 @@ jobs:
           # Push the changes in the commons folder to the commons repository using SSH
           git remote add commons $COMMONS_REPO_URL
           git subtree push --prefix=commons commons $TARGET_BRANCH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}

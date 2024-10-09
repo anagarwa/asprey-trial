@@ -1,0 +1,29 @@
+name: checkout Commons Repo
+
+# Workflow is triggered manually
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write  # Still keep this to ensure write permissions
+
+jobs:
+  push_commons_changes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          repository: anagarwa/first-helix-website
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Git logging
+        run: |
+          git log

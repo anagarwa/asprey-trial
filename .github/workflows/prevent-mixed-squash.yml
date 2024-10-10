@@ -35,7 +35,7 @@ jobs:
 
           if [ "$commons_changes_detected" = true ]; then
             pr_body="${{ github.event.pull_request.body }}"
-
+            echo $pr_body
             # Check if the PR description contains a link to the commons repo pull request
             if [[ "$pr_body" =~ https://github\.com/anagarwa/first-helix-website/pull/[0-9]+ ]]; then
               echo "Commons repo PR link found in the description."

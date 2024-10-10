@@ -15,21 +15,32 @@ jobs:
         with:
           fetch-depth: 0  # Fetch all commit history so we can compare across commits
 
-      - name: Check for mixed changes in commits
+      - name: Check for changes in 'commons/' folder
         run: |
           # Get all the commits in the PR
           commits=$(git log --pretty=format:"%H" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
           
-          # Loop through each commit to check for mixed changes
+          # Loop through each commit to check for changes in 'commons/'
+          commons_changes_detected=false
           for commit in $commits; do
             # Get the list of files changed in the current commit
             files=$(git diff-tree --no-commit-id --name-only -r $commit)
           
             commons_changes=$(echo "$files" | grep '^commons/' || true)
-            other_changes=$(echo "$files" | grep -v '^commons/' || true)
           
-            if [ -n "$commons_changes" ] && [ -n "$other_changes" ]; then
-              echo "Error: Commit $commit contains changes in both 'commons/' and other folders."
-              exit 1
+            if [ -n "$commons_changes" ]; then
+              commons_changes_detected=true
             fi
           done
+
+          if [ "$commons_changes_detected" = true ]; then
+            pr_body="${{ github.event.pull_request.body }}"
+
+            # Check if the PR description contains a link to the commons repo pull request
+            if [[ "$pr_body" =~ https://github\.com/anagarwa/first-helix-website/pull/[0-9]+ ]]; then
+              echo "Commons repo PR link found in the description."
+            else
+              echo "Error: Changes in 'commons/' folder detected, but the PR description does not include a link to the commons repo pull request."
+              exit 1
+            fi
+          fi

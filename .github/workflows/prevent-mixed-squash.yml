@@ -65,8 +65,8 @@ jobs:
               # Compare the diffs
               echo "Stripped commons changes:"
               echo "$updated_commons_changes"
-
-              if echo "$commons_repo_diff" | sort | grep -q -F -x -f <(echo "$updated_commons_changes" | sort); then
+              echo "Commons repo diff:"
+              if diff <(echo "$commons_repo_diff" | sort) <(echo "$stripped_commons_changes" | sort) >/dev/null; then
                 echo "Changes in commons repo PR match the changes in the commons/ folder."
               else
                 echo "Error: Changes in commons repo PR do not match the changes in the commons/ folder of this PR."

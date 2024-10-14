@@ -27,20 +27,14 @@ jobs:
 
       - name: Check for changes in 'commons/' folder
         run: |
-          # Get all the commits in the PR
-          commits=$(git log --pretty=format:"%H" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
-          
-          commons_changes_detected=false
-          for commit in $commits; do
-            files=$(git diff-tree --no-commit-id --name-only -r $commit)
-            commons_changes=$(echo "$files" | grep '^commons/' || true)
-            if [ -n "$commons_changes" ]; then
-              commons_changes_detected=true
-              break
-            fi
-          done
+          # Check for changes in the commons/ folder in the current PR
+          commons_changes=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep '^commons/' || true)
 
-          if [ "$commons_changes_detected" = true ]; then
+          # Debug output for commons_changes
+          echo "Changes in commons/ folder in current PR:"
+          echo "$commons_changes"
+
+          if [ -n "$commons_changes" ]; then
             pr_body="${{ github.event.pull_request.body }}"
             commons_pr_url=$(echo "$pr_body" | grep -oE 'https://github\.com/anagarwa/first-helix-website/pull/[0-9]+')
 
@@ -58,13 +52,15 @@ jobs:
 
               # Get the diff from the commons PR
               commons_repo_diff=$(git diff --name-only origin/main commons-pr-branch | grep '^commons/' || true)
+
+              # Debug output for commons_repo_diff
+              echo "Changes in commons/ folder in commons repo PR:"
+              echo "$commons_repo_diff"
+
               cd ..
 
-              # Get the diff in the current PR for commons folder
-              current_pr_diff=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep '^commons/' || true)
-
               # Compare the diffs
-              if [ "$commons_repo_diff" = "$current_pr_diff" ]; then
+              if [ "$commons_repo_diff" = "$commons_changes" ]; then
                 echo "Changes in commons repo PR match the changes in the commons/ folder."
               else
                 echo "Error: Changes in commons repo PR do not match the changes in the commons/ folder of this PR."

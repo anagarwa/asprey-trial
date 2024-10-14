@@ -51,10 +51,10 @@ jobs:
               git checkout commons-pr-branch
 
               # Get the diff from the commons PR
-              commons_repo_diff=$(git diff --name-only origin/main commons-pr-branch | grep '^commons/' || true)
+              commons_repo_diff=$(git diff --name-only origin/main commons-pr-branch || true)
 
               # Debug output for commons_repo_diff
-              echo "Changes in commons/ folder in commons repo PR:"
+              echo "Changes in commons repo PR:"
               echo "$commons_repo_diff"
 
               cd ..

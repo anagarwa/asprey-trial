@@ -30,10 +30,6 @@ jobs:
           # Check for changes in the commons/ folder in the current PR
           commons_changes=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep '^commons/' || true)
 
-          # Debug output for commons_changes
-          echo "Changes in commons/ folder in current PR:"
-          echo "$commons_changes"
-
           if [ -n "$commons_changes" ]; then
             pr_body="${{ github.event.pull_request.body }}"
             commons_pr_url=$(echo "$pr_body" | grep -oE 'https://github\.com/anagarwa/first-helix-website/pull/[0-9]+')
@@ -53,27 +49,17 @@ jobs:
               # Get the changes from the commons repo PR directly (no filtering for commons/)
               commons_repo_diff=$(git diff --name-only origin/main commons-pr-branch || true)
 
-              # Debug output for commons_repo_diff
-              echo "Changes in commons repo PR:"
-              echo "$commons_repo_diff"
-
               cd ..
 
               # Remove the 'commons/' prefix from commons_changes for comparison
-              stripped_commons_changes=$(echo "$commons_changes" | sed 's|^commons/||')
+              updated_commons_changes=$(echo "$commons_changes" | sed 's|^commons/||')
 
               # Trim whitespace and sort both lists
-              stripped_commons_changes_sorted=$(echo "$stripped_commons_changes" | sed 's/^[ \t]*//;s/[ \t]*$//' | sort)
+              updated_commons_changes_sorted=$(echo "$updated_commons_changes" | sed 's/^[ \t]*//;s/[ \t]*$//' | sort)
               commons_repo_diff_sorted=$(echo "$commons_repo_diff" | sed 's/^[ \t]*//;s/[ \t]*$//' | sort)
 
-              # Debug output for stripped and sorted changes
-              echo "Stripped and sorted commons changes:"
-              echo "$stripped_commons_changes_sorted"
-              echo "Sorted changes in commons repo PR:"
-              echo "$commons_repo_diff_sorted"
-
               # Compare the sorted changes
-              if diff <(echo "$commons_repo_diff_sorted") <(echo "$stripped_commons_changes_sorted") >/dev/null; then
+              if diff <(echo "$commons_repo_diff_sorted") <(echo "$updated_commons_changes_sorted") >/dev/null; then
                 echo "Changes in commons repo PR match the changes in the commons/ folder."
               else
                 # Output the changes when they do not match

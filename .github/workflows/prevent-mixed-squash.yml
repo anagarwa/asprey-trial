@@ -46,11 +46,11 @@ jobs:
               git clone git@github.com:anagarwa/first-helix-website.git commons-repo
               cd commons-repo
 
-              # Fetch the specific pull request branch
+              # Fetch the changes in the commons PR directly
               git fetch origin pull/$commons_pr_number/head:commons-pr-branch
               git checkout commons-pr-branch
 
-              # Get the diff from the commons PR
+              # Get the changes from the commons repo PR directly (no filtering for commons/)
               commons_repo_diff=$(git diff --name-only origin/main commons-pr-branch || true)
 
               # Debug output for commons_repo_diff
@@ -59,8 +59,14 @@ jobs:
 
               cd ..
 
+              # Remove the 'commons/' prefix from commons_changes for comparison
+              stripped_commons_changes=$(echo "$commons_changes" | sed 's|^commons/||')
+
               # Compare the diffs
-              if [ "$commons_repo_diff" = "$commons_changes" ]; then
+              echo "Stripped commons changes:"
+              echo "$stripped_commons_changes"
+
+              if echo "$commons_repo_diff" | sort | grep -q -F -x -f <(echo "$stripped_commons_changes" | sort); then
                 echo "Changes in commons repo PR match the changes in the commons/ folder."
               else
                 echo "Error: Changes in commons repo PR do not match the changes in the commons/ folder of this PR."

@@ -60,15 +60,23 @@ jobs:
               cd ..
 
               # Remove the 'commons/' prefix from commons_changes for comparison
-              updated_commons_changes=$(echo "$commons_changes" | sed 's|^commons/||')
+              stripped_commons_changes=$(echo "$commons_changes" | sed 's|^commons/||')
 
-              # Compare the diffs
-              echo "Stripped commons changes:"
-              echo "$updated_commons_changes"
-              echo "Commons repo diff:"
-              if diff <(echo "$commons_repo_diff" | sort) <(echo "$stripped_commons_changes" | sort) >/dev/null; then
+              # Trim whitespace and sort both lists
+              stripped_commons_changes_sorted=$(echo "$stripped_commons_changes" | sed 's/^[ \t]*//;s/[ \t]*$//' | sort)
+              commons_repo_diff_sorted=$(echo "$commons_repo_diff" | sed 's/^[ \t]*//;s/[ \t]*$//' | sort)
+
+              # Debug output for stripped and sorted changes
+              echo "Stripped and sorted commons changes:"
+              echo "$stripped_commons_changes_sorted"
+              echo "Sorted changes in commons repo PR:"
+              echo "$commons_repo_diff_sorted"
+
+              # Compare the sorted changes
+              if diff <(echo "$commons_repo_diff_sorted") <(echo "$stripped_commons_changes_sorted") >/dev/null; then
                 echo "Changes in commons repo PR match the changes in the commons/ folder."
               else
+                # Output the changes when they do not match
                 echo "Error: Changes in commons repo PR do not match the changes in the commons/ folder of this PR."
                 echo "Changes in commons folder:"
                 echo "$commons_changes"

@@ -1,4 +1,4 @@
-name: Prevent Mixed Changes on PR
+name: Compare commons Changes with Commons PR
 
 on:
   pull_request:
@@ -26,12 +26,14 @@ jobs:
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
       - name: Check for changes in 'commons/' folder
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           # Check for changes in the commons/ folder in the current PR
           commons_changes=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep '^commons/' || true)
 
           if [ -n "$commons_changes" ]; then
-            pr_body="${{ github.event.pull_request.body }}"
+            pr_body="$PR_BODY"
             commons_pr_url=$(echo "$pr_body" | grep -oE 'https://github\.com/anagarwa/first-helix-website/pull/[0-9]+')
 
             if [ -n "$commons_pr_url" ]; then
